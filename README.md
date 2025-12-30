@@ -96,7 +96,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## Authentication Providers
 
 1. **Credentials**: Email and password
-2. **Google OAuth**: Sign in with Google
+2. **GitLab OAuth**: Sign in with Gitlab
 3. **GitHub OAuth**: Sign in with GitHub
 
 ## Authorization
