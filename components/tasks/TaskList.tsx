@@ -6,9 +6,12 @@ import { useState, useEffect } from "react"
 interface Task {
   id: string
   title: string
+  description: string
   status: string
   createdAt: Date
   dueDate: Date | null
+  priority: number
+  estimatedHours: number
 }
 
 interface TaskListProps {
@@ -26,6 +29,26 @@ export default function TaskList({ tasks, workspaceId, onTaskUpdated, onTaskDele
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const getPriorityColor = (priority: number) => {
+    switch (priority) {
+      case 3: return 'text-red-600 bg-red-50'
+      case 2: return 'text-orange-600 bg-orange-50'
+      case 1: return 'text-yellow-600 bg-yellow-50'
+      case 0: return 'text-green-600 bg-green-50'
+      default: return 'text-gray-600 bg-gray-50'
+    }
+  }
+
+  const getPriorityLabel = (priority: number) => {
+    switch (priority) {
+      case 3: return 'Urgent'
+      case 2: return 'High'
+      case 1: return 'Medium'
+      case 0: return 'Low'
+      default: return 'Unknown'
+    }
+  }
 
   const formatDate = (date: Date) => {
     if (!isClient) {
@@ -112,30 +135,45 @@ export default function TaskList({ tasks, workspaceId, onTaskUpdated, onTaskDele
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                 />
                 <div className="flex-1">
-                  <span
-                    className={`${
-                      task.status === "done"
-                        ? "line-through text-gray-500"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    {task.title}
-                  </span>
-                  {task.dueDate && (
+                  <div className="flex items-center gap-2 mb-1">
                     <span
-                      className={`ml-2 text-xs ${
-                        new Date(task.dueDate) < new Date() && task.status !== "done"
-                          ? "text-red-600 font-semibold"
-                          : "text-gray-500"
+                      className={`${
+                        task.status === "done"
+                          ? "line-through text-gray-500"
+                          : "text-gray-900"
                       }`}
                     >
-                      (Due: {formatDate(new Date(task.dueDate))})
+                      {task.title}
                     </span>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(task.priority)}`}>
+                      {getPriorityLabel(task.priority)}
+                    </span>
+                  </div>
+                  {task.description && (
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      {task.description}
+                    </p>
                   )}
+                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                    {task.dueDate && (
+                      <span
+                        className={`${
+                          new Date(task.dueDate) < new Date() && task.status !== "done"
+                            ? "text-red-600 font-semibold"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        Due: {formatDate(new Date(task.dueDate))}
+                      </span>
+                    )}
+                    <span>
+                      Est: {task.estimatedHours}h
+                    </span>
+                    <span>
+                      Created: {formatDate(new Date(task.createdAt))}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs text-gray-500">
-                  {formatDate(new Date(task.createdAt))}
-                </span>
               </div>
               <button
                 onClick={() => handleDelete(task.id)}

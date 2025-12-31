@@ -4,9 +4,11 @@ import { requireAuth, requireWorkspaceAccess } from "@/lib/auth-helpers"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { analyzeTaskPriority } from "@/lib/taskScheduler"
 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Task title is required"),
+  description: z.string().optional(),
   workspaceId: z.string().min(1, "Workspace ID is required"),
   dueDate: z
     .string()
@@ -47,6 +49,7 @@ export async function createTask(formData: FormData) {
     
     const data = createTaskSchema.parse({
       title: formData.get("title"),
+      description: formData.get("description"),
       workspaceId: formData.get("workspaceId"),
       dueDate: formData.get("dueDate"),
     })
@@ -66,12 +69,18 @@ export async function createTask(formData: FormData) {
       return { success: false, error: "A task with this name already exists in this workspace." }
     }
 
+    // Analyze task priority and estimate hours
+    const analysis = analyzeTaskPriority(data.title, data.description || "", data.dueDate || null)
+
     const task = await prisma.task.create({
       data: {
         title: data.title,
+        description: data.description,
         workspaceId: data.workspaceId,
         status: "todo",
         dueDate: data.dueDate,
+        priority: analysis.priority,
+        estimatedHours: analysis.estimatedHours,
       },
     })
 

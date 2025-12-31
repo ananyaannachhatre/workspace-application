@@ -4,13 +4,17 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import CreateTaskForm from "./CreateTaskForm"
 import TaskList from "./TaskList"
+import GanttChart from "./GanttChart"
 
 interface Task {
   id: string
   title: string
+  description: string
   status: string
   createdAt: Date
   dueDate: Date | null
+  priority: number
+  estimatedHours: number
 }
 
 interface WorkspaceTasksProps {
@@ -52,7 +56,7 @@ export default function WorkspaceTasks({ workspaceId, initialTasks }: WorkspaceT
 
       <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
         <p className="text-sm text-blue-700">
-          <strong>Note:</strong> Below are the tasks to be completed. Once a task is finished, click on the checkbox to mark it as "done".
+          <strong>Note:</strong> Below are the tasks to be completed. Once a task is finished, click on the checkbox to mark it as "done". Tasks are automatically prioritized based on due date and description analysis.
         </p>
       </div>
 
@@ -63,6 +67,10 @@ export default function WorkspaceTasks({ workspaceId, initialTasks }: WorkspaceT
           onTaskUpdated={handleTaskUpdated}
           onTaskDeleted={handleTaskDeleted}
         />
+      </div>
+
+      <div>
+        <GanttChart tasks={tasks} />
       </div>
     </div>
   )

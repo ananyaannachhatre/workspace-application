@@ -10,6 +10,7 @@ interface CreateTaskFormProps {
 
 export default function CreateTaskForm({ workspaceId, onTaskCreated }: CreateTaskFormProps) {
   const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
   const [dueDate, setDueDate] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -42,6 +43,7 @@ export default function CreateTaskForm({ workspaceId, onTaskCreated }: CreateTas
 
       const formData = new FormData()
       formData.append("title", title)
+      formData.append("description", description)
       formData.append("workspaceId", workspaceId)
       formData.append("dueDate", dueDate)
 
@@ -54,6 +56,7 @@ export default function CreateTaskForm({ workspaceId, onTaskCreated }: CreateTas
       }
 
       setTitle("")
+      setDescription("")
       setDueDate("")
       onTaskCreated()
     } catch (err) {
@@ -72,15 +75,28 @@ export default function CreateTaskForm({ workspaceId, onTaskCreated }: CreateTas
       )}
 
       <div className="space-y-4">
-        <div className="flex gap-4">
+        <div>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Task title"
             required
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
+        </div>
+        
+        <div>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe the task and its requirements (e.g., complexity, dependencies, resources needed)"
+            rows={3}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        
+        <div className="flex gap-4">
           <div className="flex flex-col">
             <label htmlFor="dueDate" className="text-xs text-gray-600 mb-1">Due Date</label>
             <input
