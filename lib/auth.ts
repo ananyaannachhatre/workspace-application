@@ -14,32 +14,37 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            return null
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
+          })
+
+          if (!user || !user.password) {
+            return null
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          )
+
+          if (!isPasswordValid) {
+            return null
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          }
+        } catch (error) {
+          console.error("Auth error:", error)
           return null
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        })
-
-        if (!user || !user.password) {
-          return null
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        )
-
-        if (!isPasswordValid) {
-          return null
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
         }
       }
     }),
@@ -91,75 +96,80 @@ export const authOptions: NextAuthOptions = {
       return session
     },
     async signIn({ user, account, profile }) {
-      if (account?.provider === "credentials") {
-        return true
-      }
-
-      if (!user.email) {
-        return false
-      }
-
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-        include: { accounts: true }
-      })
-
-      if (existingUser) {
-        // Check if this specific OAuth provider account already exists
-        const existingOAuthAccount = existingUser.accounts.find(acc => acc.provider === account?.provider)
-        
-        if (!existingOAuthAccount) {
-          // Link the new OAuth provider to the existing user
-          await prisma.account.create({
-            data: {
-              userId: existingUser.id,
-              type: account?.type || "oauth",
-              provider: account?.provider || "",
-              providerAccountId: account?.providerAccountId || "",
-              refresh_token: account?.refresh_token,
-              access_token: account?.access_token,
-              expires_at: account?.expires_at,
-              token_type: account?.token_type,
-              scope: account?.scope,
-              id_token: account?.id_token,
-              session_state: account?.session_state,
-            }
-          })
+      try {
+        if (account?.provider === "credentials") {
+          return true
         }
-        
-        // Update the user object with the existing user's ID
-        user.id = existingUser.id
-        return true
-      }
 
-      if (account && user) {
-        const newUser = await prisma.user.create({
-          data: {
-            email: user.email,
-            name: user.name,
-            image: user.image,
-            accounts: {
-              create: {
-                type: account.type,
-                provider: account.provider,
-                providerAccountId: account.providerAccountId,
-                refresh_token: account.refresh_token,
-                access_token: account.access_token,
-                expires_at: account.expires_at,
-                token_type: account.token_type,
-                scope: account.scope,
-                id_token: account.id_token,
-                session_state: account.session_state,
+        if (!user.email) {
+          return false
+        }
+
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          include: { accounts: true }
+        })
+
+        if (existingUser) {
+          // Check if this specific OAuth provider account already exists
+          const existingOAuthAccount = existingUser.accounts.find(acc => acc.provider === account?.provider)
+          
+          if (!existingOAuthAccount) {
+            // Link the new OAuth provider to the existing user
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account?.type || "oauth",
+                provider: account?.provider || "",
+                providerAccountId: account?.providerAccountId || "",
+                refresh_token: account?.refresh_token,
+                access_token: account?.access_token,
+                expires_at: account?.expires_at,
+                token_type: account?.token_type,
+                scope: account?.scope,
+                id_token: account?.id_token,
+                session_state: account?.session_state,
+              }
+            })
+          }
+          
+          // Update the user object with the existing user's ID
+          user.id = existingUser.id
+          return true
+        }
+
+        if (account && user) {
+          const newUser = await prisma.user.create({
+            data: {
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              accounts: {
+                create: {
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                  session_state: account.session_state,
+                }
               }
             }
-          }
-        })
-        
-        // Update the user object with the database ID
-        user.id = newUser.id
-      }
+          })
+          
+          // Update the user object with the database ID
+          user.id = newUser.id
+        }
 
-      return true
+        return true
+      } catch (error) {
+        console.error("SignIn error:", error)
+        return false
+      }
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
