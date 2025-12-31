@@ -14,10 +14,35 @@ export default function SignUpForm() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
+  const validatePassword = (password: string) => {
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    const hasNumber = /\d/.test(password)
+    const hasMinLength = password.length >= 6
+
+    if (!hasMinLength) {
+      return "Password must be at least 6 characters long"
+    }
+    if (!hasSpecialChar) {
+      return "Password must contain at least one special character"
+    }
+    if (!hasNumber) {
+      return "Password must contain at least one number"
+    }
+    return ""
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
+
+    // Validate password before submission
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      setError(passwordError)
+      setLoading(false)
+      return
+    }
 
     try {
       const formData = new FormData()
@@ -108,7 +133,7 @@ export default function SignUpForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            placeholder="Password (min 6 characters)"
+            placeholder="Password (min 6 chars, 1 number, 1 special char)"
           />
         </div>
 

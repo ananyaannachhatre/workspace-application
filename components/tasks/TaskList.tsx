@@ -31,10 +31,10 @@ export default function TaskList({ tasks, workspaceId, onTaskUpdated, onTaskDele
     if (!isClient) {
       return date.toISOString().split('T')[0]
     }
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
       month: '2-digit',
-      day: '2-digit'
+      year: 'numeric'
     })
   }
 
@@ -87,10 +87,18 @@ export default function TaskList({ tasks, workspaceId, onTaskUpdated, onTaskDele
     )
   }
 
+  // Sort tasks by due date (earliest first), tasks without due date at the end
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (!a.dueDate && !b.dueDate) return 0
+    if (!a.dueDate) return 1
+    if (!b.dueDate) return -1
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+  })
+
   return (
     <div className="bg-white rounded-lg shadow">
       <ul className="divide-y divide-gray-200">
-        {tasks.map((task) => (
+        {sortedTasks.map((task) => (
           <li key={task.id} className="p-4 hover:bg-gray-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 flex-1">
