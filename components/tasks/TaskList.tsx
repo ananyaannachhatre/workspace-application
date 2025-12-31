@@ -31,11 +31,11 @@ export default function TaskList({ tasks, workspaceId, onTaskUpdated, onTaskDele
     if (!isClient) {
       return date.toISOString().split('T')[0]
     }
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
+    // Manual formatting for dd/mm/yyyy to avoid locale issues
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
   }
 
   const handleStatusChange = async (taskId: string, newStatus: "todo" | "done") => {
