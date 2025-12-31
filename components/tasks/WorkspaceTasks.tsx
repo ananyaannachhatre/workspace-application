@@ -9,12 +9,12 @@ import GanttChart from "./GanttChart"
 interface Task {
   id: string
   title: string
-  description: string
+  description: string | null
   status: string
   createdAt: Date
   dueDate: Date | null
   priority: number
-  estimatedHours: number
+  estimatedHours: number | null
 }
 
 interface WorkspaceTasksProps {

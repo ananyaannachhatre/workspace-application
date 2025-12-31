@@ -6,12 +6,12 @@ import { useState, useEffect } from "react"
 interface Task {
   id: string
   title: string
-  description: string
+  description: string | null
   status: string
   createdAt: Date
   dueDate: Date | null
   priority: number
-  estimatedHours: number
+  estimatedHours: number | null
 }
 
 interface TaskListProps {
@@ -105,7 +105,7 @@ export default function TaskList({ tasks, workspaceId, onTaskUpdated, onTaskDele
   if (tasks.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6 text-center">
-        <p className="text-gray-500">No tasks yet. Create one to get started!</p>
+        <p className="text-gray-500">No tasks yet. Create one to get started!<span className="text-xs text-gray-400">(0h)</span></p>
       </div>
     )
   }
@@ -167,7 +167,7 @@ export default function TaskList({ tasks, workspaceId, onTaskUpdated, onTaskDele
                       </span>
                     )}
                     <span>
-                      Est: {task.estimatedHours}h
+                      Est: {task.estimatedHours || 0}h
                     </span>
                     <span>
                       Created: {formatDate(new Date(task.createdAt))}

@@ -161,20 +161,20 @@ export function analyzeTaskPriority(title: string, description: string, dueDate:
 export function scheduleTasks(tasks: Array<{
   id: string
   title: string
-  description: string
+  description: string | null
   dueDate: Date | null
   priority: number
-  estimatedHours: number
+  estimatedHours: number | null
   status: string
   createdAt: Date
 }>): Array<{
   task: {
     id: string
     title: string
-    description: string
+    description: string | null
     dueDate: Date | null
     priority: number
-    estimatedHours: number
+    estimatedHours: number | null
     status: string
     createdAt: Date
   }
@@ -213,15 +213,15 @@ export function scheduleTasks(tasks: Array<{
     
     return 0
   })
-  
+
   const scheduledTasks: Array<{
     task: {
       id: string
       title: string
-      description: string
+      description: string | null
       dueDate: Date | null
       priority: number
-      estimatedHours: number
+      estimatedHours: number | null
       status: string
       createdAt: Date
     }
@@ -237,7 +237,8 @@ export function scheduleTasks(tasks: Array<{
     const estimatedStart = new Date(task.createdAt)
     estimatedStart.setHours(9, 0, 0, 0) // Assume started at 9 AM
     
-    const estimatedEnd = new Date(estimatedStart.getTime() + task.estimatedHours * 60 * 60 * 1000)
+    const estimatedHours = task.estimatedHours || 1 // Default to 1 hour if null
+    const estimatedEnd = new Date(estimatedStart.getTime() + estimatedHours * 60 * 60 * 1000)
     
     scheduledTasks.push({
       task: {
@@ -287,7 +288,7 @@ export function scheduleTasks(tasks: Array<{
   
   // Schedule only TODO tasks (completed tasks keep their time slots)
   sortedTasks.forEach((task, index) => {
-    const taskDuration = task.estimatedHours
+    const taskDuration = task.estimatedHours || 1 // Default to 1 hour if null
     let remainingHours = taskDuration
     let taskStartTime = new Date(currentTime)
     

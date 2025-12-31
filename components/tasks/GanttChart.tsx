@@ -6,12 +6,12 @@ import { scheduleTasks } from "@/lib/taskScheduler"
 interface Task {
   id: string
   title: string
-  description: string
+  description: string | null
   status: string
   createdAt: Date
   dueDate: Date | null
   priority: number
-  estimatedHours: number
+  estimatedHours: number | null
 }
 
 interface ScheduledTask {
@@ -249,7 +249,7 @@ export default function GanttChart({ tasks }: GanttChartProps) {
                         <div className="flex items-center gap-2 mt-1">
                           <span className={`inline-block w-2 h-2 rounded-full ${getPriorityColor(scheduledTask.task.priority, isCompleted)}`}></span>
                           <span className="text-xs text-gray-600">{getPriorityLabel(scheduledTask.task.priority)}</span>
-                          <span className="text-xs text-gray-400">({scheduledTask.task.estimatedHours}h)</span>
+                          <span className="text-xs text-gray-400">({scheduledTask.task.estimatedHours || 0}h)</span>
                         </div>
                       </div>
                       
@@ -300,7 +300,7 @@ export default function GanttChart({ tasks }: GanttChartProps) {
           <div>
             <div className="font-medium text-gray-900">Total Hours</div>
             <div className="text-gray-600">
-              {scheduledTasks.reduce((sum, st) => sum + st.task.estimatedHours, 0)}h
+              {scheduledTasks.reduce((sum, st) => sum + (st.task.estimatedHours || 0), 0)}h
             </div>
           </div>
           <div>
